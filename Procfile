@@ -1,1 +1,1 @@
-web: gunicorn　django_ec.wsgi
+web: gunicorn rocky-depths-29723:app
