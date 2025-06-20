@@ -1,1 +1,1 @@
-web: gunicorn rocky-depths-29723:app
+web: gunicorn config.wsgi
