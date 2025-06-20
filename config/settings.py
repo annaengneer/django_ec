@@ -15,6 +15,7 @@ import environ
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 env = environ.Env()
