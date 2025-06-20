@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import environ
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -26,7 +27,7 @@ environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env("1%*y(4m-#tdqkcsqj3#6*v$1#283r0ej2ap2*b@19genm72l4j")
+SECRET_KEY = env("SECRET_KEY", default = "1%*y(4m-#tdqkcsqj3#6*v$1#283r0ej2ap2*b@19genm72l4j")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -79,7 +80,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    "default": env.db(),
+    "default": env.db(
+        default= f"sqlite://{os.path.join(BASE_DIR, 'db.sqlite3')}"
+    ),
 }
 
 
