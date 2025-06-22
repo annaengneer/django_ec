@@ -29,7 +29,7 @@ environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY", default = "1%*y(4m-#tdqkcsqj3#6*v$1#283r0ej2ap2*b@19genm72l4j")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = ['rocky-depths-29723-798aba8c0d31.herokuapp.com']
 
