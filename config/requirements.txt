@@ -5,5 +5,4 @@ sqlparse==0.5.3
 typing_extensions==4.13.2
 dj-database-url>=2,<3
 whitenoise[brotli]>=6,<7
-psycopg[binary]; sys_platform != "linux"
-psycopg[c]; sys_platform == "linux"
+psycopg2>=2.9
