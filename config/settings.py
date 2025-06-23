@@ -80,7 +80,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-urlparse.uses_netloc.append('postgres')
 DATABASES_URL = os.environ.get('DATABASE_URL')
 
 if DATABASES_URL:
@@ -147,3 +146,4 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
