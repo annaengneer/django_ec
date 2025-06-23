@@ -14,7 +14,7 @@ import environ
 
 from pathlib import Path
 import os
-import urllib.parse as urlparse
+from urllib.parse import urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
