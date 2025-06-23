@@ -14,7 +14,7 @@ import environ
 
 from pathlib import Path
 import os
-import dj_database_url
+import urllib.parse as urlparse
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -80,9 +80,31 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    "default": dj_database_url.config(conn_max_age=600, ssl_require=True)
-}
+urlparse.uses_netloc.append('postgres')
+DATABASES_URL = os.environ.get('DATABASE_URL')
+
+if DATABASES_URL:
+    url = urlparse.urlparse(DATABASES_URL)
+
+    DATABASES = {
+        "default": {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': url.path[1:],
+            'USER': url.username,
+            'PASSWORD': url.password,
+            'HOST': url.hostname,
+            'PORT': url.port or '',
+        }
+    }
+else:
+    DATABASES= {
+        'default':{
+            'ENGINE':'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+
+
 
 
 # Password validation

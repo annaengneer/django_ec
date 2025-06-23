@@ -3,6 +3,6 @@ asgiref==3.8.1
 Django==4.2.1
 sqlparse==0.5.3
 typing_extensions==4.13.2
-dj_database_url>=2,<3
+# dj_database_url>=2,<3
 whitenoise[brotli]>=6,<7
 psycopg2>=2.9
