@@ -9,10 +9,10 @@
     {% for product in products %}
     <div class="col-md-4 md-4">
       <div class="card h-100">
-        <img src="{{ product.image_url }}" class="card-img-top" alt="{{ product.name }}"/>
+        <img src="{{ product.image_url.url }}" class="card-img-top" alt="{{ product.name }}"/>
         <div class="card-body">
           <h5 class="card-title">{{product.name}}</h5>
-          <p class="card-text">{{ product.price }}円q</p>
+          <p class="card-text">{{ product.price }}円</p>
           <a href="{%url 'detailfunc' product.id %}" class="btn btn-outline-dark">add to cart</a>
         </div>
       </div>
