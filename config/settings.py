@@ -19,6 +19,8 @@ import urllib.parse as urlparse
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIR_URL = '/media/'
+MEDIR_ROOT = BASE_DIR / 'media'
 
 env = environ.Env()
 environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
@@ -30,9 +32,9 @@ environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY", default = "1%*y(4m-#tdqkcsqj3#6*v$1#283r0ej2ap2*b@19genm72l4j")
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
-
-ALLOWED_HOSTS = ['rocky-depths-29723-798aba8c0d31.herokuapp.com']
+# DEBUG = env.bool('DEBUG', default='False')
+DEBUG = True
+ALLOWED_HOSTS = ['rocky-depths-29723-798aba8c0d31.herokuapp.com','localhost', '127.0.0.1']
 
 
 # Application definition
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'ec_site'
 ]
 
 MIDDLEWARE = [
@@ -61,7 +64,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'config/templates'],
+        'DIRS': [BASE_DIR /'config'/'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -140,7 +143,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "config"/ "static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
