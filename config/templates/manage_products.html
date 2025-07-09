@@ -1,0 +1,27 @@
+{% extends "manage_base.html" %} 
+
+{% block title %}商品管理一覧ページ{% endblock %} 
+{% block content %}
+<div class="container mt-5">
+  <h1 class="mb-4" style="font-weight: bold;">商品管理一覧ページ</h1>
+  <a href="{%url 'manage_create' %}" class="btn btn-primary">新規作成</a>
+  <div class="row">
+    {% for product in products %}
+    <div class="col-md-4 md-4">
+      <div class="card h-100">
+        <img src="{{ product.image_url.url }}" class="card-img-top" alt="{{ product.name }}"/>
+        <div class="card-body">
+          <h5 class="card-title">{{product.name}}</h5>
+          <p class="card-text">{{ product.price }}円</p>
+          <form action="{% url 'manage_delete' product.pk %}" method="POST" style="display: inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary" onclick="return confirm('本当に削除しますか')">削除</button>
+          </form>
+          <a href="{%url 'manage_edit' product.id %}" class="btn btn-success">編集</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

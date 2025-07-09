@@ -1,0 +1,10 @@
+{% extends 'manage_base.html' %}
+
+{% block content %}
+<h1 style="font-weight: bold; color: blue;">新規商品作成</h1>
+<form method="POST" enctype="multipart/form-data">
+{% csrf_token %}
+{{ form.as_p }}
+<button type="submit" class="btn btn-primary">保存する</button>
+</form>
+{% endblock %}

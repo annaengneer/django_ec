@@ -153,3 +153,4 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+BASICAUTH_USER={"admin":"pw","anna":"1111"}
