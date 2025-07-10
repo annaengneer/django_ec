@@ -9,10 +9,8 @@ https://docs.djangoproject.com/en/4.2/howto/deployment/wsgi/
 
 import os
 
-from wsgi_basic_auth import BasicAuth
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
-original_application = get_wsgi_application()
-application = BasicAuth(original_application)
+application = get_wsgi_application()
