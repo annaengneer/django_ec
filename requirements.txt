@@ -5,9 +5,12 @@ certifi==2025.6.15
 chardet==5.2.0
 charset-normalizer==3.4.2
 click==8.2.1
+cloudinary==1.44.1
 cookiecutter==2.6.0
 dj-database-url==3.0.0
 Django==5.2.1
+django-basicauth==0.5.3
+django-cloudinary-storage==0.3.0
 django-debug-toolbar==5.2.0
 django-environ==0.12.0
 environ==1.0
@@ -15,6 +18,7 @@ gunicorn==23.0.0
 idna==3.10
 iniconfig==2.1.0
 Jinja2==3.1.6
+legacy-cgi==2.6.3
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
@@ -37,4 +41,5 @@ types-python-dateutil==2.9.0.20250516
 typing_extensions==4.14.0
 tzdata==2025.2
 urllib3==2.4.0
-whitenoise[brotli]>=6,<7
+WebOb==1.8.9
+wsgi-basic-auth==1.1.0

@@ -3,6 +3,7 @@ from .models import Product
 from .forms import ProductForm
 from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
+from .forms import ProductForm
 
 
 # Create your views here.
@@ -28,7 +29,7 @@ def manage_create(request):
             return redirect('manage_products')
     else:
         form = ProductForm()
-        return render(request, 'manage_create.html', {'form': form})
+    return render(request, 'manage_create.html', {'form': form})
 
 def manage_edit(request,pk):
     products = get_object_or_404(Product, pk=pk)
@@ -47,4 +48,13 @@ def manage_delete(request,pk):
     if request.method == 'POST':
         product.delete()
         return redirect('manage_products')
-
+    
+def upload_product(request):
+    if request.method == 'POST':
+        form = ProductForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('product_list')
+    else:
+        form = ProductForm()
+    return render(request, 'upload product.html',{'form':form})
