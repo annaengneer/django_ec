@@ -23,7 +23,8 @@ MEDIR_URL = '/media/'
 MEDIR_ROOT = BASE_DIR / 'media'
 
 env = environ.Env()
-environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
+if os.environ.get("DJANGO_DEVELOPMENT") == "True":
+    environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
 
 
 # Quick-start development settings - unsuitable for production
