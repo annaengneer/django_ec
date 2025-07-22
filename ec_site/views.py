@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import Product
+from .models import Product, Cart, CartItem
 from .forms import ProductForm
 from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
@@ -29,45 +29,62 @@ def reset_cart(request):
 def add_cartfunc(request,pk):
     product = get_object_or_404(Product, pk=pk)
     quantity= int(request.POST.get('quantity', 1))
-    cart = request.session.get('cart', {})
-    cart[str(product.id)] = cart.get(str(product.id), 0) + quantity
-    request.session['cart'] = cart
+    cart = get_cart(request)
+    
+    item, created = CartItem.objects.get_or_create(cart=cart, product=product)
+    item.quantity += quantity
+    item.save()
 
     return redirect('view_cartfunc')
 
 def view_cartfunc(request):
-    cart = request.session.get('cart', {})
-    cart_items = []
-    total = 0
-    item_count = 0
+    cart = get_cart(request)
+    cart_items = CartItem.objects.filter(cart=cart)
+
+    total = sum(item.product.price * item.quantity for item in cart_items)
+    item_count = sum(item.quantity for item in cart_items)
     print("DEBUG: item_count =", item_count)
 
-    for product_id, quantity in cart.items():
-        product= Product.objects.get(pk=int(product_id))
-        subtotal = product.price * quantity
-        total += subtotal
-        item_count += quantity
-        cart_items.append({
-            'product': product,
-            'quantity': quantity,
-            'subtotal':subtotal,
-        })
     return render(request,'product_cart.html',{
         'cart_items': cart_items,
         'total': total,
         'item_count': item_count,
     })
+def get_cart(request):
+    cart_id = request.session.get('cart_id')
+    if cart_id:
+        cart = Cart.objects.filter(id=cart_id).first()
+        if cart:
+            return cart
+    cart = Cart.objects.create()
+    request.session['cart_id']= cart.id
+    return cart
+
+def save_cart_id(request):
+    cart_id = request.session.get('cart_id')
+    if cart_id:
+        try:
+            cart = Cart.objects.get(id=cart_id)
+        except Cart.DoesNotExist:
+            cart = Cart.objects.create()
+            request.session['cart_id'] = cart.id
+    else:
+        cart = Cart.objects.create()
+        request.session['cart_id'] = cart.id
+    return cart
 
 @require_POST
 def delete_cartfunc(request, pk):
-    cart = request.session.get('cart',{})
-    product_id = str(pk)
-    quantity = int(request.POST.get('quantity', 1))
-    if product_id in cart:
-        cart[product_id] -= quantity
-        if cart[product_id] == 0:
-            del cart[product_id]
-        request.session['cart'] = cart
+    cart = get_cart(request)
+    try:
+        item = CartItem.objects.get(cart=cart, product__pk=pk)
+        item.quantity -= 1
+        if item.quantity <= 0:
+            item.delete()
+        else:
+            item.save()
+    except CartItem.DoesNotExist:
+        pass
     return redirect('view_cartfunc')
 
 

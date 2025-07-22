@@ -205,10 +205,8 @@
               {% for item in cart_items %}
               <li class="list-group-item d-flex justify-content-between lh-sm">
                 <div>
-                  <h6 class="my-0">{{ item.product.name }} × {{ item.quantity }}</h6>
-                  <small class="text-body-secondary">{{ item.product.description }}</small>
+                  <h6 class="my-0">{{ item.product.name }} × {{ item.quantity }} ({{ item.product.price }}円/個)</h6>
                 </div>
-                <span class="text-body-secondary">{{ item.subtotal }}円</span>
                 <form method="POST" action="{% url 'delete_cartfunc' item.product.id %}" style="display: inline;">
                   {% csrf_token %}
                   <input type="number" name="quantity" value="1" min="1" max="{{ item.quantity}}">
