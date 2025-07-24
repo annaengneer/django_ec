@@ -5,6 +5,7 @@ from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from .forms import ProductForm
+from utils.cart import get_cart
 
 
 # Create your views here.
@@ -39,7 +40,7 @@ def add_cartfunc(request,pk):
 
 def view_cartfunc(request):
     cart = get_cart(request)
-    cart_items = CartItem.objects.filter(cart=cart)
+    cart_items = cart.items.select_related('product')
 
     total = sum(item.product.price * item.quantity for item in cart_items)
     item_count = sum(item.quantity for item in cart_items)
@@ -50,28 +51,8 @@ def view_cartfunc(request):
         'total': total,
         'item_count': item_count,
     })
-def get_cart(request):
-    cart_id = request.session.get('cart_id')
-    if cart_id:
-        cart = Cart.objects.filter(id=cart_id).first()
-        if cart:
-            return cart
-    cart = Cart.objects.create()
-    request.session['cart_id']= cart.id
-    return cart
 
-def save_cart_id(request):
-    cart_id = request.session.get('cart_id')
-    if cart_id:
-        try:
-            cart = Cart.objects.get(id=cart_id)
-        except Cart.DoesNotExist:
-            cart = Cart.objects.create()
-            request.session['cart_id'] = cart.id
-    else:
-        cart = Cart.objects.create()
-        request.session['cart_id'] = cart.id
-    return cart
+
 
 @require_POST
 def delete_cartfunc(request, pk):
