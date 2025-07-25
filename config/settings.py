@@ -23,7 +23,8 @@ MEDIR_URL = '/media/'
 MEDIR_ROOT = BASE_DIR / 'media'
 
 env = environ.Env()
-environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
+if os.environ.get("DJANGO_DEVELOPMENT") == "True":
+    environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -109,10 +110,12 @@ else:
     }
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': env('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': env('CLOUDINARY_API_KEY'),
-    'API_SECRET': env('CLOUDINARY_API_SECRET'),
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     
 
 # Password validation
@@ -148,10 +151,12 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+from pathlib import Path
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "config"/ "static",
+    BASE_DIR / "config" /"static",
 ]
 
 # Default primary key field type
