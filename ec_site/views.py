@@ -122,7 +122,7 @@ def cart_purchasefunc(request):
 
 def send_email(to_email, subject, message):
     return requests.post(
-        f'https://api.mailgun.net/v3/{setting.MAILGUN_DOMAIN}/messages',
+        f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
         auth=('api', settings.MAILGUN_API_KEY),
         data={
             'from':settings.DEFAULT_FROM_EMAIL,
