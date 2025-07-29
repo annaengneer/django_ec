@@ -7,7 +7,9 @@ from django.views.decorators.http import require_POST
 from .forms import ProductForm
 from utils.cart import get_cart
 from django.contrib import messages
-
+from django.conf import settings
+import requests
+from django.http import HttpResponse
 
 
 # Create your views here.
@@ -104,11 +106,38 @@ def cart_purchasefunc(request):
         cart.items.all().delete()
 
         messages.success(request, "ご購入ありがとうございます")
+        print("メール送信を開始します")
+        send_email(
+            to_email=request.POST.get('email'),
+            subject='ご注文ありがとうございました'
+            messages='ご注文受け付けました。近日中に発送します。'
+        )
+        print("メール送信を呼び出しました")
         return redirect('listfunc')
+    
     except Cart.DoesNotExist:
         print("POSTデータ:", request.POST)
         messages.error(request, "カートが見つかりませんでした。")
         return redirect('view_cartfunc')
+
+def send_email(to_email, subject, message):
+    return requests.post(
+        f'https://api.mailgun.net/v3/{setting.MAILGUN_DOMAIN}/messages',
+        auth=('api', settings.MAILGUN_API_KEY),
+        data={
+            'from':settings.DEFAULT_FROM_EMAIL,
+            'to':[to_email],
+            'subject': subject,
+            "text": message
+        }
+    )
+def test_mail(request):
+    send_email(
+        to_email='kokoan438@gmail.com',
+        subject='テスト送信',
+        message='これはMailgunからのテスト送信です'
+    )
+    return HttpResponse('送信しました')
 
 def order_success(request):
     return render(request, 'order_success.html')

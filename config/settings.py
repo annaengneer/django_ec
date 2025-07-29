@@ -164,4 +164,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-# BASICAUTH_USER={"admin":"pw"}
+
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
+DEFAULT_FROM_EMAIL = f'YouShop <mailgun@{MAILGUN_DOMAIN}>'
