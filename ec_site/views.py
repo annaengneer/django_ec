@@ -109,7 +109,7 @@ def cart_purchasefunc(request):
         print("メール送信を開始します")
         send_email(
             to_email=request.POST.get('email'),
-            subject='ご注文ありがとうございました'
+            subject='ご注文ありがとうございました',
             messages='ご注文受け付けました。近日中に発送します。'
         )
         print("メール送信を呼び出しました")
