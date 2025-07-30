@@ -131,7 +131,7 @@ def send_email(to_email, subject, message):
                 "text": message
                 }
         )
-        print("Mailgun response":response.status_code, response.text)
+        print(f"Mailgun response:{response.status_code}, {response.text}")
         return response
 def test_mail(request):
     send_email(
