@@ -130,9 +130,9 @@ def send_email(to_email, subject, message):
                 'subject': subject,
                 "text": message
                 }
-            )
-            print("Mailgun response:", response.status_code, response.text)
-            return response
+        )
+        print("Mailgun response:", response.status_code, response.text)
+        return response
 def test_mail(request):
     send_email(
         to_email='kokoan438@gmail.com',
