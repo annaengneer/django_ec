@@ -103,7 +103,7 @@ def cart_purchasefunc(request):
         <table border ='1' cellpadding='8'>
         <tr>
         <th>商品名</th>
-        <th>>数量</th>
+        <th>数量</th>
         <th>単価</th>
         <th>小計</th>
         </tr>
@@ -119,7 +119,7 @@ def cart_purchasefunc(request):
               <td>{subtotal}</td> 
             </tr>
             """
-        html_message += """
+        html_message += f"""
         </table>
         <p><strong>合計金額: {total}円</strong></p>
         """
