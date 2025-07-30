@@ -106,10 +106,9 @@ def cart_purchasefunc(request):
         cart.items.all().delete()
 
         messages.success(request, "ご購入ありがとうございます")
-        print("メール送信を開始します")
+        print(f"送信先メールアドレス: {request.POST.get('email')}")
         send_email(
             to_email=request.POST.get('email'),
-            print("送信先メールアドレス", to_email)
             subject='ご注文ありがとうございました',
             message='ご注文受け付けました。近日中に発送します。'
         )
@@ -132,7 +131,7 @@ def send_email(to_email, subject, message):
                 "text": message
                 }
         )
-        print("Mailgun response:", response.status_code, response.text)
+        print("Mailgun response":response.status_code, response.text)
         return response
 def test_mail(request):
     send_email(
