@@ -113,9 +113,10 @@ def cart_purchasefunc(request):
             messages.error(request,"メールアドレスが入力されていません")
             return redirect('view_cartfunc')
         response = send_email(
-            to_email=email
+            to_email=email,
             subject='ご注文ありがとうございました',
-            message='以下に購入明細添付しています。'
+            message='以下に購入明細添付しています。',
+            html_message=detail_html
         )
         print(f"送信先メールアドレス: {email}")
         print(f"Mailgun response: {response.status_code},{response.text}")
