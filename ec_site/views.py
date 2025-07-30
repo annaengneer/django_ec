@@ -98,22 +98,24 @@ def cart_purchasefunc(request):
             zip=request.POST.get('zip', ''),
         )
         
-        for item in cart_items:
-            Card.objects.create(
-                order=order,
-                product=item.product,
-                quantity=item.quantity
-            )
+        detail_html = "<h2>ご注文明細</h2><table border ='1' cellpadding='8'>"
+        detail_html += "<tr><th>商品名</th><th>単価</th><th>数量</th><th>合計</th></tr>"
 
-        cart.items.all().delete()
-        email = request.POST.get('email')
+        total = 0
+        for item in cart_items:
+            subtotal = item.product.price * item.quantity
+            total += subtotal
+            detail_html += f"<tr><td colspan='3' aline='right'><strong>合計</strong></td><td>{total}円</td></tr>"
+            detail_html += "</table><p>注文ありがとうございます。準備出来次第発送いたします。</p>"
+            cart.items.all().delete()
+            email = request.POST.get('email')
         if not email:
             messages.error(request,"メールアドレスが入力されていません")
             return redirect('view_cartfunc')
         response = send_email(
-            to_email=email,
+            to_email=email
             subject='ご注文ありがとうございました',
-            message='ご注文受け付けました。近日中に発送します。'
+            message='以下に購入明細添付しています。'
         )
         print(f"送信先メールアドレス: {email}")
         print(f"Mailgun response: {response.status_code},{response.text}")
@@ -130,7 +132,16 @@ def cart_purchasefunc(request):
         messages.error(request, "カートが見つかりませんでした。")
         return redirect('view_cartfunc')
 
-def send_email(to_email, subject, message):
+def send_email(to_email, subject, message,html_message=None):
+        data ={
+            "from": settings.DEFAULT_FROM_EMAIL,
+            "to": [to_email],
+            "subject": subject,
+            "text": message,
+        }
+        if html_message:
+            data["html"]= html_message
+
         response = requests.post(
             f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
             auth=('api', settings.MAILGUN_API_KEY),
@@ -143,13 +154,6 @@ def send_email(to_email, subject, message):
         )
         print(f"Mailgun response:{response.status_code}, {response.text}")
         return response
-def test_mail(request):
-    send_email(
-        to_email='kokoan438@gmail.com',
-        subject='テスト送信',
-        message='これはMailgunからのテスト送信です'
-    )
-    return HttpResponse('送信しました')
 
 def order_success(request):
     return render(request, 'order_success.html')
