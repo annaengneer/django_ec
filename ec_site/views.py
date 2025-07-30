@@ -80,6 +80,8 @@ def cart_purchasefunc(request):
         return redirect('view_cartfunc')
     
     try:
+        print("POSTデータ:", request.POST)
+        
         cart = Cart.objects.get(id=cart_id)
         cart_items = cart.items.select_related('product')
         total =sum(item.product.price * item.quantity for item in cart_items)
