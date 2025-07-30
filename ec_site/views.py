@@ -98,15 +98,25 @@ def cart_purchasefunc(request):
             zip=request.POST.get('zip', ''),
         )
         
-        detail_html = "<h2>ご注文明細</h2><table border ='1' cellpadding='8'>"
-        detail_html += "<tr><th>商品名</th><th>単価</th><th>数量</th><th>合計</th></tr>"
+        html_message = """
+        <h2>ご注文明細</h2>
+        <table border ='1' cellpadding='8'>
+        <tr>
+        <th>商品名</th>
+        <th>単価</th>
+        <th>数量</th>
+        </tr>
 
-        total = 0
+        """
         for item in cart_items:
-            subtotal = item.product.price * item.quantity
-            total += subtotal
-            detail_html += f"<tr><td colspan='3' aline='right'><strong>合計</strong></td><td>{total}円</td></tr>"
-            detail_html += "</table><p>注文ありがとうございます。準備出来次第発送いたします。</p>"
+            html_message += f"""
+            <tr>
+              <td>{item.product.name}</td>
+              <td>{item.quantity}</td>
+              <td>{item.product.price}</td> 
+            </tr>
+            """
+            html_message += "</table>"
             cart.items.all().delete()
             email = request.POST.get('email')
         if not email:
@@ -116,7 +126,7 @@ def cart_purchasefunc(request):
             to_email=email,
             subject='ご注文ありがとうございました',
             message='以下に購入明細添付しています。',
-            html_message=detail_html
+            html_message=html_message
         )
         print(f"送信先メールアドレス: {email}")
         print(f"Mailgun response: {response.status_code},{response.text}")
@@ -146,14 +156,8 @@ def send_email(to_email, subject, message,html_message=None):
         response = requests.post(
             f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
             auth=('api', settings.MAILGUN_API_KEY),
-            data={
-                'from':settings.DEFAULT_FROM_EMAIL,
-                'to':[to_email],
-                'subject': subject,
-                "text": message
-                }
+            data=data
         )
-        print(f"Mailgun response:{response.status_code}, {response.text}")
         return response
 
 def order_success(request):
