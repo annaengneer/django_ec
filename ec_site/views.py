@@ -121,16 +121,18 @@ def cart_purchasefunc(request):
         return redirect('view_cartfunc')
 
 def send_email(to_email, subject, message):
-    return requests.post(
-        f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
-        auth=('api', settings.MAILGUN_API_KEY),
-        data={
-            'from':settings.DEFAULT_FROM_EMAIL,
-            'to':[to_email],
-            'subject': subject,
-            "text": message
-        }
-    )
+        response = requests.post(
+            f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
+            auth=('api', settings.MAILGUN_API_KEY),
+            data={
+                'from':settings.DEFAULT_FROM_EMAIL,
+                'to':[to_email],
+                'subject': subject,
+                "text": message
+                }
+            )
+            print("Mailgun response:", response.status_code, response.text)
+            return response
 def test_mail(request):
     send_email(
         to_email='kokoan438@gmail.com',
