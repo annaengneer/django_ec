@@ -103,22 +103,28 @@ def cart_purchasefunc(request):
         <table border ='1' cellpadding='8'>
         <tr>
         <th>商品名</th>
+        <th>>数量</th>
         <th>単価</th>
-        <th>数量</th>
+        <th>小計</th>
         </tr>
 
         """
         for item in cart_items:
+            subtotal = item.product.price * item.quantity
             html_message += f"""
             <tr>
               <td>{item.product.name}</td>
               <td>{item.quantity}</td>
-              <td>{item.product.price}</td> 
+              <td>{item.product.price}</td>
+              <td>{subtotal}</td> 
             </tr>
             """
-            html_message += "</table>"
-            cart.items.all().delete()
-            email = request.POST.get('email')
+        html_message += """
+        </table>
+        <p><strong>合計金額: {total}円</strong></p>
+        """
+        cart.items.all().delete()
+        email = request.POST.get('email')
         if not email:
             messages.error(request,"メールアドレスが入力されていません")
             return redirect('view_cartfunc')

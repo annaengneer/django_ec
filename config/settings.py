@@ -167,4 +167,4 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
-DEFAULT_FROM_EMAIL = f'YouShop <mailgun@{MAILGUN_DOMAIN}>'
+DEFAULT_FROM_EMAIL = f'Dream Company <mailgun@{MAILGUN_DOMAIN}>'
