@@ -81,7 +81,7 @@ def cart_purchasefunc(request):
     
     try:
         print("POSTデータ:", request.POST)
-        
+
         cart = Cart.objects.get(id=cart_id)
         cart_items = cart.items.select_related('product')
         total =sum(item.product.price * item.quantity for item in cart_items)
@@ -107,14 +107,19 @@ def cart_purchasefunc(request):
 
         cart.items.all().delete()
 
-        messages.success(request, "ご購入ありがとうございます")
         print(f"送信先メールアドレス: {request.POST.get('email')}")
-        send_email(
+        response = send_email(
             to_email=request.POST.get('email'),
             subject='ご注文ありがとうございました',
             message='ご注文受け付けました。近日中に発送します。'
         )
-        print("メール送信を呼び出しました")
+        print(f"Mailgun response: {response.status_code},{response.text}")
+        
+        if response.status_code == 200:
+            messages.success(request, "ご購入ありがとうございました")
+        else:
+            messages.warning(request, "ご購入は完了しましたが、メールの送信に失敗しました。")
+
         return redirect('listfunc')
     
     except Cart.DoesNotExist:
