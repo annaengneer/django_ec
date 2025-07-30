@@ -107,7 +107,10 @@ def cart_purchasefunc(request):
 
         cart.items.all().delete()
 
-        print(f"送信先メールアドレス: {request.POST.get('email')}")
+        print(f"送信先メールアドレス: {request.POST.get('email', '')}")
+        if not email:
+            messages.error(request,"メールアドレスが入力されていません")
+            return redirect('view_cartfunc')
         response = send_email(
             to_email=request.POST.get('email'),
             subject='ご注文ありがとうございました',
