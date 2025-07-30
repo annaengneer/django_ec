@@ -106,16 +106,16 @@ def cart_purchasefunc(request):
             )
 
         cart.items.all().delete()
-
-        print(f"送信先メールアドレス: {request.POST.get('email', '')}")
+        email = request.POST.get('email')
         if not email:
             messages.error(request,"メールアドレスが入力されていません")
             return redirect('view_cartfunc')
         response = send_email(
-            to_email=request.POST.get('email'),
+            to_email=email,
             subject='ご注文ありがとうございました',
             message='ご注文受け付けました。近日中に発送します。'
         )
+        print(f"送信先メールアドレス: {email}")
         print(f"Mailgun response: {response.status_code},{response.text}")
         
         if response.status_code == 200:
