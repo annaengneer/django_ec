@@ -219,5 +219,11 @@ def manage_order_list(request):
     return render(request, 'order_list.html',{'order':order, 'items':items})
 
 def manage_order_detail(request, pk):
-    purchase = get_object_or_404(Product, pk=pk)
-    return render(request,'order_detail.html', {'purchase': purchase})
+    order = get_object_or_404(Order, pk=pk)
+    items =order.card_set.select_related('product').all()
+    total =sum(item.product.price * item.quantity for item in items)
+    return render(request,'order_detail.html', {
+        'order': order,
+        'items': items,
+        'total': total,
+    })
