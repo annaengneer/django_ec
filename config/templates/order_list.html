@@ -17,6 +17,8 @@
         <td>{{ order.created_at }}</td>
         <td><a href="{% url 'order_detail' order.id %}">詳細</a></td>
     </tr>
+    {% empty %}
+    <tr><td>注文はありません</td></tr>
     {% endfor%}
 {% endblock%}
 </table>
