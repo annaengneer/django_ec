@@ -1,0 +1,21 @@
+{% extends 'manage_base.html' %}
+<h2>注文詳細</h2>
+<p>氏名:{{ order.first_name }} {{ order.last_name}}</p>
+<p>メール: {{ order.email}}</p>
+
+<table style="border: 1px solid black;">
+    <tr>
+        <th>商品名</th>
+        <th>数量</th>
+        <th>単価</th>
+        <th>小計</th>
+    </tr>
+    {% for item in items %}
+    <tr>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.product.price }}</td>
+        <td>{{ item.product.price|floatformat:0|add:"" }}</td>
+    </tr>
+    {% endfor%}
+</table>
