@@ -215,7 +215,7 @@ def upload_product(request):
 @basic_auth_required
 def manage_order_list(request):
     orders = Order.objects.all().order_by()
-    return render(request, 'manage/order_list.html')
+    return render(request, 'order_list.html')
 
 def manage_order_detail(request, pk):
     purchase = get_object_or_404(Product, pk=pk)
