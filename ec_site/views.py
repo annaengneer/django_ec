@@ -97,6 +97,12 @@ def cart_purchasefunc(request):
             state=request.POST.get('state', ''),
             zip=request.POST.get('zip', ''),
         )
+        for item in cart_items:
+            Card.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity
+            )
         
         html_message = """
         <h2>ご注文明細</h2>
