@@ -1,4 +1,5 @@
 {% extends 'manage_base.html' %}
+{% block content %}
 <h2>注文一覧</h2>
 <table style="border: 1px solid black;">
     <tr>
@@ -17,4 +18,5 @@
         <td><a href="{% url 'order_detail' order.id %}">詳細</a></td>
     </tr>
     {% endfor%}
+{% endblock%}
 </table>
