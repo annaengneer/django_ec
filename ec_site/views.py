@@ -33,12 +33,17 @@ def reset_cart(request):
 @require_POST
 def add_cartfunc(request,pk):
     product = get_object_or_404(Product, pk=pk)
-    quantity= int(request.POST.get('quantity', 1))
-    cart = get_cart(request)
+    cart_id = request.session.get('cart_id')
+    if not cart_id:
+        cart = Cart.objects.create()
+        request.session['cart_id'] = cart.id
+    else:
+        cart = Cart.objects.get(pk=cart_id)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     
-    item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    item.quantity += quantity
-    item.save()
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
 
     return redirect('view_cartfunc')
 
