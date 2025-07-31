@@ -19,5 +19,6 @@
         <td>{{ item.product.price|floatformat:0|add:"" }}</td>
     </tr>
     {% endfor%}
-{% endblock%}
 </table>
+<p><strong>合計金額: {{ total }}円</strong></p>
+{% endblock%}
