@@ -79,6 +79,8 @@ def delete_cartfunc(request, pk):
 
 @require_POST
 def cart_purchasefunc(request):
+    if request.method == "GET":
+        return redirect('view_cartfunc')
     cart_id = request.session.get('cart_id')
     if not cart_id:
         messages.error(request,"カートが空です。")
