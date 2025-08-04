@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import Product, Cart, CartItem,Order,Card
+from .models import Product, Cart, CartItem,Order,OrderProduct
 from .forms import ProductForm
 from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
@@ -12,7 +12,6 @@ import requests
 from django.http import HttpResponse
 
 
-# Create your views here.
 
 def listfunc(request):
     products = Product.objects.all()
@@ -79,8 +78,6 @@ def delete_cartfunc(request, pk):
 
 @require_POST
 def cart_purchasefunc(request):
-    if request.method == "GET":
-        return redirect('view_cartfunc')
     cart_id = request.session.get('cart_id')
     if not cart_id:
         messages.error(request,"カートが空です。")
@@ -105,7 +102,7 @@ def cart_purchasefunc(request):
             zip=request.POST.get('zip', ''),
         )
         for item in cart_items:
-            Card.objects.create(
+            OrderProduct.objects.create(
                 order=order,
                 product=item.product,
                 quantity=item.quantity
@@ -179,8 +176,6 @@ def send_email(to_email, subject, message,html_message=None):
         )
         return response
 
-def order_success(request):
-    return render(request, 'order_success.html')
 
 @basic_auth_required
 def manage_products(request):
