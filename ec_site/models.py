@@ -33,5 +33,4 @@ class OrderProduct(models.Model):
     name = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField()
-    # create_at = models.DateField(default=date.today)
     create_at = models.DateTimeField(default=timezone.now)

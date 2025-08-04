@@ -207,8 +207,13 @@ def manage_delete(request,pk):
     product = get_object_or_404(Product, pk=pk)
 
     if request.method == 'POST':
-        product.delete()
-        return redirect('manage_products')
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_products')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'manage_edit.html', {'form': form})
     
 def upload_product(request):
     if request.method == 'POST':
