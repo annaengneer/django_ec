@@ -15,6 +15,14 @@ import environ
 from pathlib import Path
 import os
 import urllib.parse as urlparse
+import cloudinary, cloudinary.uploader, cloudinary.api
+
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET')
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
@@ -164,4 +172,7 @@ STATICFILES_DIRS = [
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-# BASICAUTH_USER={"admin":"pw"}
+
+MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
+MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
+DEFAULT_FROM_EMAIL = f'Dream Company <mailgun@{MAILGUN_DOMAIN}>'

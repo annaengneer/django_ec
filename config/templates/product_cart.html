@@ -197,7 +197,7 @@
         </div>
         <div class="row g-5">
           <div class="col-md-5 col-lg-4 order-md-last">
-            <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="d-flex justify-content-between align-items-center">
               <span class="text-primary">Your cart</span>
               <span class="badge bg-primary rounded-pill">{{ item_count }}</span>
             </h4>
@@ -207,9 +207,9 @@
                 <div>
                   <h6 class="my-0">{{ item.product.name }} × {{ item.quantity }} ({{ item.product.price }}円/個)</h6>
                 </div>
-                <form method="POST" action="{% url 'delete_cartfunc' item.product.id %}" style="display: inline;">
+                <form method="POST" action="{% url 'delete_cartfunc' item.product.id %}" class="d-flex align-items-center" style="gap: 8px;">
                   {% csrf_token %}
-                  <input type="number" name="quantity" value="1" min="1" max="{{ item.quantity}}">
+                  <input type="number" name="quantity" value="1" min="1" max="{{ item.quantity}}" class="form-control form-control-sm" style="width: 70px;">
                   <button type="submit" class="btn btn-secondary" onclick="return confirm('本当に削除しますか')">削除</button>
                 </form>
               </li>
@@ -227,7 +227,7 @@
                 <span>Total</span> <strong>{{total}}円</strong>
               </li>
             </ul>
-            <form class="card p-2">
+            <div class="card p-2">
               <div class="input-group">
                 <input
                   type="text"
@@ -236,18 +236,20 @@
                 />
                 <button type="submit" class="btn btn-secondary">Redeem</button>
               </div>
-            </form>
+            </div>
           </div>
           <div class="col-md-7 col-lg-8">
             <h4 class="mb-3">Billing address</h4>
-            <form class="needs-validation" novalidate>
-              <div class="row g-3">
+            <form method="POST" action="{% url 'cart_purchasefunc' %}" class="needs-validation">
+              {% csrf_token %}  
+            <div class="row g-3">
                 <div class="col-sm-6">
                   <label for="firstName" class="form-label">First name</label>
                   <input
                     type="text"
                     class="form-control"
                     id="firstName"
+                    name="first_name"
                     placeholder=""
                     value=""
                     required
@@ -262,6 +264,7 @@
                     type="text"
                     class="form-control"
                     id="lastName"
+                    name="last_name"
                     placeholder=""
                     value=""
                     required
@@ -278,6 +281,7 @@
                       type="text"
                       class="form-control"
                       id="username"
+                      name="username"
                       placeholder="Username"
                       required
                     />
@@ -295,7 +299,9 @@
                     type="email"
                     class="form-control"
                     id="email"
+                    name="email"
                     placeholder="you@example.com"
+                    required
                   />
                   <div class="invalid-feedback">
                     Please enter a valid email address for shipping updates.
@@ -307,6 +313,7 @@
                     type="text"
                     class="form-control"
                     id="address"
+                    name="address"
                     placeholder="1234 Main St"
                     required
                   />
@@ -323,14 +330,15 @@
                     type="text"
                     class="form-control"
                     id="address2"
+                    name="address2"
                     placeholder="Apartment or suite"
                   />
                 </div>
                 <div class="col-md-5">
                   <label for="country" class="form-label">Country</label>
-                  <select class="form-select" id="country" required>
+                  <select class="form-select" id="country" name="country" required>
                     <option value="">Choose...</option>
-                    <option>United States</option>
+                    <option>Japan</option>
                   </select>
                   <div class="invalid-feedback">
                     Please select a valid country.
@@ -338,9 +346,9 @@
                 </div>
                 <div class="col-md-4">
                   <label for="state" class="form-label">State</label>
-                  <select class="form-select" id="state" required>
+                  <select class="form-select" id="state" name="state" required>
                     <option value="">Choose...</option>
-                    <option>California</option>
+                    <option>Tokyo</option>
                   </select>
                   <div class="invalid-feedback">
                     Please provide a valid state.
@@ -352,6 +360,7 @@
                     type="text"
                     class="form-control"
                     id="zip"
+                    name="zip"
                     placeholder=""
                     required
                   />
@@ -380,42 +389,7 @@
                 >
               </div>
               <hr class="my-4" />
-              <h4 class="mb-3">Payment</h4>
-              <div class="my-3">
-                <div class="form-check">
-                  <input
-                    id="credit"
-                    name="paymentMethod"
-                    type="radio"
-                    class="form-check-input"
-                    checked
-                    required
-                  />
-                  <label class="form-check-label" for="credit"
-                    >Credit card</label
-                  >
-                </div>
-                <div class="form-check">
-                  <input
-                    id="debit"
-                    name="paymentMethod"
-                    type="radio"
-                    class="form-check-input"
-                    required
-                  />
-                  <label class="form-check-label" for="debit">Debit card</label>
-                </div>
-                <div class="form-check">
-                  <input
-                    id="paypal"
-                    name="paymentMethod"
-                    type="radio"
-                    class="form-check-input"
-                    required
-                  />
-                  <label class="form-check-label" for="paypal">PayPal</label>
-                </div>
-              </div>
+              <h4 class="mb-3">Payment(Credit Card Only)</h4>
               <div class="row gy-3">
                 <div class="col-md-6">
                   <label for="cc-name" class="form-label">Name on card</label>
@@ -423,6 +397,7 @@
                     type="text"
                     class="form-control"
                     id="cc-name"
+                    name="card_name"
                     placeholder=""
                     required
                   />
@@ -439,6 +414,7 @@
                     type="text"
                     class="form-control"
                     id="cc-number"
+                    name="card_number"
                     placeholder=""
                     required
                   />
@@ -454,6 +430,7 @@
                     type="text"
                     class="form-control"
                     id="cc-expiration"
+                    name="expriration"
                     placeholder=""
                     required
                   />
@@ -465,6 +442,7 @@
                     type="text"
                     class="form-control"
                     id="cc-cvv"
+                    name="cvv"
                     placeholder=""
                     required
                   />
@@ -472,10 +450,10 @@
                 </div>
               </div>
               <hr class="my-4" />
-              <button class="w-100 btn btn-primary btn-lg" type="submit">
-                Continue to checkout
-              </button>
-            </form>
+                  <button class="w-100 btn btn-primary btn-lg" type="submit">
+                    購入する
+                  </button>
+                </form>
           </div>
         </div>
       </main>

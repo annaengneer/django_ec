@@ -1,14 +1,17 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem,Order,OrderProduct
 from .forms import ProductForm
 from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from .forms import ProductForm
 from utils.cart import get_cart
+from django.contrib import messages
+from django.conf import settings
+import requests
+from django.http import HttpResponse
 
 
-# Create your views here.
 
 def listfunc(request):
     products = Product.objects.all()
@@ -29,12 +32,17 @@ def reset_cart(request):
 @require_POST
 def add_cartfunc(request,pk):
     product = get_object_or_404(Product, pk=pk)
-    quantity= int(request.POST.get('quantity', 1))
-    cart = get_cart(request)
+    cart_id = request.session.get('cart_id')
+    if not cart_id:
+        cart = Cart.objects.create()
+        request.session['cart_id'] = cart.id
+    else:
+        cart = Cart.objects.get(pk=cart_id)
+    cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     
-    item, created = CartItem.objects.get_or_create(cart=cart, product=product)
-    item.quantity += quantity
-    item.save()
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
 
     return redirect('view_cartfunc')
 
@@ -68,6 +76,106 @@ def delete_cartfunc(request, pk):
         pass
     return redirect('view_cartfunc')
 
+@require_POST
+def cart_purchasefunc(request):
+    cart_id = request.session.get('cart_id')
+    if not cart_id:
+        messages.error(request,"カートが空です。")
+        return redirect('view_cartfunc')
+    
+    try:
+        print("POSTデータ:", request.POST)
+
+        cart = Cart.objects.get(id=cart_id)
+        cart_items = cart.items.select_related('product')
+        total =sum(item.product.price * item.quantity for item in cart_items)
+
+        order = Order.objects.create(
+            first_name=request.POST.get('first_name', ''),
+            last_name=request.POST.get('last_name', ''),
+            user_name=request.POST.get('username', ''),
+            email=request.POST.get('email',''),
+            address=request.POST.get('address',''),
+            address2=request.POST.get('address2', ''),
+            country=request.POST.get('country', ''),
+            state=request.POST.get('state', ''),
+            zip=request.POST.get('zip', ''),
+        )
+        for item in cart_items:
+            OrderProduct.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity
+            )
+        
+        html_message = """
+        <h2>ご注文明細</h2>
+        <table border ='1' cellpadding='8'>
+        <tr>
+        <th>商品名</th>
+        <th>数量</th>
+        <th>単価</th>
+        <th>小計</th>
+        </tr>
+
+        """
+        for item in cart_items:
+            subtotal = item.product.price * item.quantity
+            html_message += f"""
+            <tr>
+              <td>{item.product.name}</td>
+              <td>{item.quantity}</td>
+              <td>{item.product.price}</td>
+              <td>{subtotal}</td> 
+            </tr>
+            """
+        html_message += f"""
+        </table>
+        <p><strong>合計金額: {total}円</strong></p>
+        """
+        cart.items.all().delete()
+        email = request.POST.get('email')
+        if not email:
+            messages.error(request,"メールアドレスが入力されていません")
+            return redirect('view_cartfunc')
+        response = send_email(
+            to_email=email,
+            subject='ご注文ありがとうございました',
+            message='以下に購入明細添付しています。',
+            html_message=html_message
+        )
+        print(f"送信先メールアドレス: {email}")
+        print(f"Mailgun response: {response.status_code},{response.text}")
+        
+        if response.status_code == 200:
+            messages.success(request, "ご購入ありがとうございました")
+        else:
+            messages.warning(request, "ご購入は完了しましたが、メールの送信に失敗しました。")
+
+        return redirect('listfunc')
+    
+    except Cart.DoesNotExist:
+        print("POSTデータ:", request.POST)
+        messages.error(request, "カートが見つかりませんでした。")
+        return redirect('view_cartfunc')
+
+def send_email(to_email, subject, message,html_message=None):
+        data ={
+            "from": settings.DEFAULT_FROM_EMAIL,
+            "to": [to_email],
+            "subject": subject,
+            "text": message,
+        }
+        if html_message:
+            data["html"]= html_message
+
+        response = requests.post(
+            f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
+            auth=('api', settings.MAILGUN_API_KEY),
+            data=data
+        )
+        return response
+
 
 @basic_auth_required
 def manage_products(request):
@@ -99,8 +207,13 @@ def manage_delete(request,pk):
     product = get_object_or_404(Product, pk=pk)
 
     if request.method == 'POST':
-        product.delete()
-        return redirect('manage_products')
+        form = ProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect('manage_products')
+    else:
+        form = ProductForm(instance=product)
+    return render(request, 'manage_edit.html', {'form': form})
     
 def upload_product(request):
     if request.method == 'POST':
@@ -111,3 +224,18 @@ def upload_product(request):
     else:
         form = ProductForm()
     return render(request, 'upload product.html',{'form':form})
+
+@basic_auth_required
+def manage_order_list(request):
+    orders = Order.objects.all().order_by()
+    return render(request, 'order_list.html',{'orders':orders})
+
+def manage_order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+    items =order.card_set.select_related('product').all()
+    total =sum(item.product.price * item.quantity for item in items)
+    return render(request,'order_detail.html', {
+        'order': order,
+        'items': items,
+        'total': total,
+    })
