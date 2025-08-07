@@ -217,7 +217,6 @@
               >
                 <div class="text-success">
                   <h6 class="my-0">プロモーションコード</h6>
-                  {% if discount %}
                   <div class="card p-2">
                     <form method="POST" action="{% url 'apply_promo_code' %}">
                       {% csrf_token %}
