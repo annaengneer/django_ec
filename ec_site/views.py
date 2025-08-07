@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import Product, Cart, CartItem,Order,OrderProduct
+from .models import Product, Cart, CartItem,Order,OrderProduct,PromoCode
 from .forms import ProductForm
 from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
@@ -47,19 +47,29 @@ def add_cartfunc(request,pk):
     return redirect('view_cartfunc')
 
 def view_cartfunc(request):
-    cart = get_cart(request)
+    cart_id = request.session.get('cart_id')
+    if not cart_id:
+        messages.info(request, "カートが空です")
+        return render(request, 'product_cart.html')
+    
+    cart = Cart.objects.get(id=cart_id)
     cart_items = cart.items.select_related('product')
 
+    if not cart_items.exists():
+        messages.info(request, "カートが空です")
+        return render(request, 'product_cart.html')
     total = sum(item.product.price * item.quantity for item in cart_items)
-    item_count = sum(item.quantity for item in cart_items)
-    print("DEBUG: item_count =", item_count)
+    discount = request.session.get('discount', 0)
+    total_after_discount = max(total - discount, 0)
 
-    return render(request,'product_cart.html',{
+    context = {
         'cart_items': cart_items,
-        'total': total,
-        'item_count': item_count,
-    })
+        'total': total_after_discount,
+        'discount': discount,
+        'promo_code': request.session.get('promo_code')
+    }
 
+    return render(request,'product_cart.html', context)
 
 
 @require_POST
@@ -158,6 +168,29 @@ def cart_purchasefunc(request):
         print("POSTデータ:", request.POST)
         messages.error(request, "カートが見つかりませんでした。")
         return redirect('view_cartfunc')
+    
+def apply_promo_code(request):
+    if request.method == 'POST':
+        code = request.POST.get('promo_code')
+
+        if request.session.get('promo_code') == code:
+            messages.info(request,"すでにプロモーションコード使用済みです")
+            return redirect('view_cartfunc')
+        
+        try:
+            promotion = PromoCode.objects.get(code=code, is_active=True)
+
+            request.session['discount']=promotion.discount_amount
+            request.session['promo_code'] = code
+
+            promotion.is_active = False
+            promotion.save()
+
+            messages.success(request, f"プロモーションコード{code}が適応されました")
+        except PromoCode.DoesNotExist:
+            messages.error(request, "無効なプロモコードです")
+        return redirect('view_cartfunc')
+
 
 def send_email(to_email, subject, message,html_message=None):
         data ={

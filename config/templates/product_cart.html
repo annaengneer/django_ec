@@ -83,6 +83,13 @@
     </style>
   </head>
   <body class="bg-body-tertiary">
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-success{{ message.tag }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
     <svg xmlns="http://www.w3.org/2000/svg" class="d-none">
       <symbol id="check2" viewBox="0 0 16 16">
         <path
@@ -181,24 +188,16 @@
     <div class="container">
       <main>
         <div class="py-5 text-center">
-          <img
-            class="d-block mx-auto mb-4"
-            src="/docs/5.3/assets/brand/bootstrap-logo.svg"
-            alt=""
-            width="72"
-            height="57"
-          />
-          <h1 class="h2">Checkout form</h1>
+          <h1 class="h2">入力フォーム</h1>
           <p class="lead">
-            Below is an example form built entirely with Bootstrap’s form
-            controls. Each required form group has a validation state that can
-            be triggered by attempting to submit the form without completing it.
+            こちらのページに名前やメールアドレス、お支払い先等の情報の入力お願いいたします。プロモーションコードはカートの商品の一番下に入力後、適用を押してください。
+            <br>【注意】一度使ったプロモーションコードは再利用できません。
           </p>
         </div>
         <div class="row g-5">
           <div class="col-md-5 col-lg-4 order-md-last">
             <h4 class="d-flex justify-content-between align-items-center">
-              <span class="text-primary">Your cart</span>
+              <span class="text-primary">買い物カート</span>
               <span class="badge bg-primary rounded-pill">{{ item_count }}</span>
             </h4>
             <ul class="list-group mb-3">
@@ -218,33 +217,33 @@
                 class="list-group-item d-flex justify-content-between bg-body-tertiary"
               >
                 <div class="text-success">
-                  <h6 class="my-0">Promo code</h6>
-                  <small>EXAMPLECODE</small>
+                  <h6 class="my-0">プロモーションコード</h6>
+                  {% if discount %}
+                  <div class="card p-2">
+                    <form method="POST" action="{% url 'apply_promo_code' %}">
+                      {% csrf_token %}
+                     <div class="input-group">
+                       <input type="text" class="form-control" name="promo_code" placeholder="Promo code"/>
+                       <button type="submit" class="btn btn-secondary">適用</button>
+                     </div>
+                  </form>
+                  <p>割引: -{{ discount }}円</p>
+                  {% endif %}
                 </div>
-                <span class="text-success">−$5</span>
+                </div>
               </li>
               <li class="list-group-item d-flex justify-content-between">
                 <span>Total</span> <strong>{{total}}円</strong>
               </li>
             </ul>
-            <div class="card p-2">
-              <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Promo code"
-                />
-                <button type="submit" class="btn btn-secondary">Redeem</button>
-              </div>
-            </div>
           </div>
           <div class="col-md-7 col-lg-8">
-            <h4 class="mb-3">Billing address</h4>
+            <h4 class="mb-3">お客様情報の入力欄</h4>
             <form method="POST" action="{% url 'cart_purchasefunc' %}" class="needs-validation">
               {% csrf_token %}  
             <div class="row g-3">
                 <div class="col-sm-6">
-                  <label for="firstName" class="form-label">First name</label>
+                  <label for="firstName" class="form-label">姓</label>
                   <input
                     type="text"
                     class="form-control"
@@ -259,7 +258,7 @@
                   </div>
                 </div>
                 <div class="col-sm-6">
-                  <label for="lastName" class="form-label">Last name</label>
+                  <label for="lastName" class="form-label">名</label>
                   <input
                     type="text"
                     class="form-control"
@@ -274,7 +273,7 @@
                   </div>
                 </div>
                 <div class="col-12">
-                  <label for="username" class="form-label">Username</label>
+                  <label for="username" class="form-label">ユーザ名</label>
                   <div class="input-group has-validation">
                     <span class="input-group-text">@</span>
                     <input
@@ -292,8 +291,8 @@
                 </div>
                 <div class="col-12">
                   <label for="email" class="form-label"
-                    >Email
-                    <span class="text-body-secondary">(Optional)</span></label
+                    >メールアドレス
+                    <span class="text-body-secondary">(必須)</span></label
                   >
                   <input
                     type="email"
@@ -308,13 +307,13 @@
                   </div>
                 </div>
                 <div class="col-12">
-                  <label for="address" class="form-label">Address</label>
+                  <label for="address" class="form-label">配送先住所</label>
                   <input
                     type="text"
                     class="form-control"
                     id="address"
                     name="address"
-                    placeholder="1234 Main St"
+                    placeholder="address"
                     required
                   />
                   <div class="invalid-feedback">
@@ -323,39 +322,39 @@
                 </div>
                 <div class="col-12">
                   <label for="address2" class="form-label"
-                    >Address 2
-                    <span class="text-body-secondary">(Optional)</span></label
+                    >請求先住所
+                    <span class="text-body-secondary">(任意)</span></label
                   >
                   <input
                     type="text"
                     class="form-control"
                     id="address2"
                     name="address2"
-                    placeholder="Apartment or suite"
+                    placeholder="address2"
                   />
                 </div>
                 <div class="col-md-5">
-                  <label for="country" class="form-label">Country</label>
+                  <label for="country" class="form-label">出身国</label>
                   <select class="form-select" id="country" name="country" required>
-                    <option value="">Choose...</option>
-                    <option>Japan</option>
+                    <option value="">選択する</option>
+                    <option>日本</option>
                   </select>
                   <div class="invalid-feedback">
                     Please select a valid country.
                   </div>
                 </div>
                 <div class="col-md-4">
-                  <label for="state" class="form-label">State</label>
+                  <label for="state" class="form-label">都道府県</label>
                   <select class="form-select" id="state" name="state" required>
-                    <option value="">Choose...</option>
-                    <option>Tokyo</option>
+                    <option value="">選択する</option>
+                    <option>東京</option>
                   </select>
                   <div class="invalid-feedback">
                     Please provide a valid state.
                   </div>
                 </div>
                 <div class="col-md-3">
-                  <label for="zip" class="form-label">Zip</label>
+                  <label for="zip" class="form-label">郵便番号</label>
                   <input
                     type="text"
                     class="form-control"
@@ -375,7 +374,7 @@
                   id="same-address"
                 />
                 <label class="form-check-label" for="same-address"
-                  >Shipping address is the same as my billing address</label
+                  >配送先住所は請求先住所と同じです</label
                 >
               </div>
               <div class="form-check">
@@ -385,14 +384,14 @@
                   id="save-info"
                 />
                 <label class="form-check-label" for="save-info"
-                  >Save this information for next time</label
+                  >次回のためにこの情報を保存します</label
                 >
               </div>
               <hr class="my-4" />
-              <h4 class="mb-3">Payment(Credit Card Only)</h4>
+              <h4 class="mb-3">お支払い方法(クレジットカードのみ)</h4>
               <div class="row gy-3">
                 <div class="col-md-6">
-                  <label for="cc-name" class="form-label">Name on card</label>
+                  <label for="cc-name" class="form-label">名義(カード記載通り)</label>
                   <input
                     type="text"
                     class="form-control"
@@ -408,7 +407,7 @@
                 </div>
                 <div class="col-md-6">
                   <label for="cc-number" class="form-label"
-                    >Credit card number</label
+                    >クレジットカードの番号</label
                   >
                   <input
                     type="text"
@@ -424,7 +423,7 @@
                 </div>
                 <div class="col-md-3">
                   <label for="cc-expiration" class="form-label"
-                    >Expiration</label
+                    >有効期限(MM/YY)</label
                   >
                   <input
                     type="text"
@@ -437,7 +436,7 @@
                   <div class="invalid-feedback">Expiration date required</div>
                 </div>
                 <div class="col-md-3">
-                  <label for="cc-cvv" class="form-label">CVV</label>
+                  <label for="cc-cvv" class="form-label">CVV(3桁)</label>
                   <input
                     type="text"
                     class="form-control"
@@ -459,11 +458,6 @@
       </main>
       <footer class="my-5 pt-5 text-body-secondary text-center text-small">
         <p class="mb-1">&copy; 2017–2025 Company Name</p>
-        <ul class="list-inline">
-          <li class="list-inline-item"><a href="#">Privacy</a></li>
-          <li class="list-inline-item"><a href="#">Terms</a></li>
-          <li class="list-inline-item"><a href="#">Support</a></li>
-        </ul>
       </footer>
     </div>
     <script

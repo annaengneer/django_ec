@@ -1,4 +1,6 @@
-{% extends "base.html" %} {% block title %}商品一覧 
+{% extends "base.html" %} 
+{% block title %}
+商品一覧 
 {% endblock %} 
 {% block content %}
 {% if messages %}
@@ -10,7 +12,7 @@
 {% endif %}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container px-4 px-lg-5">
-    <a class="navbar-brand" href="#!">shopping site</a>
+    <a class="navbar-brand" href="#!">animal site</a>
     <button
       class="navbar-toggler"
       type="button"
@@ -57,12 +59,12 @@
   </div>
 </nav>
 <!-- Header-->
-<header class="bg-dark py-5">
+<header class="bg-secondary py-5">
   <div class="container px-4 px-lg-5 my-5">
     <div class="text-center text-white">
-      <h1 class="display-4 fw-bolder">Shop in style</h1>
-      <p class="lead fw-normal text-white-50 mb-0">
-        With this shop hompeage template
+      <h1 class="display-4 fw-bolder">ふれあいどうぶつえん</h1>
+      <p class="lead fw-normal text-white mb-0">
+        たくさんのどうぶつたちとふれあえる！
       </p>
     </div>
   </div>
@@ -71,7 +73,7 @@
   <div class="row gy-4">
     {% for product in products %}
     <div class="col-md-4 md-4">
-      <div class="card h-100">
+      <div class="card h-100" style="background-color: #fffacd;">
         <a
           href="{%url 'detailfunc' product.id %}"
           class="btn btn-outline-light"
@@ -88,7 +90,7 @@
           <form method="POST" action="{% url 'add_cartfunc' product.pk %}">
             {% csrf_token %}
             <input type="hidden" name="quantity" value="1" />
-            <button type="submit" class="btn btn-outline-dark">
+            <button type="submit" class="btn btn-outline-success">
               add to cart
             </button>
           </form>
@@ -98,9 +100,9 @@
     {% endfor %}
   </div>
 </div>
-<footer class="py-5 bg-dark">
+<footer class="py-5 bg-secondary">
   <div class="container">
-    <p class="m-0 text-center text-white">Copyright &copy; Your Website 2023</p>
+    <p class="m-0 text-center text-white">Copyright &copy; an Website 2025</p>
   </div>
 </footer>
 {% endblock %}
