@@ -100,6 +100,17 @@ def cart_purchasefunc(request):
         cart_items = cart.items.select_related('product')
         total =sum(item.product.price * item.quantity for item in cart_items)
 
+        code = request.session.get('promo_code')
+        discount = request.session.get('discount', 0)
+        promo = None
+
+        if code:
+            try:
+                promo = PromoCode.objects.get(code=code)
+            except PromoCode.DoesNotExist:
+                promo = None
+        total_discount =max( total - discount, 0)
+
         order = Order.objects.create(
             first_name=request.POST.get('first_name', ''),
             last_name=request.POST.get('last_name', ''),
@@ -110,11 +121,14 @@ def cart_purchasefunc(request):
             country=request.POST.get('country', ''),
             state=request.POST.get('state', ''),
             zip=request.POST.get('zip', ''),
+            promo_code=promo,
+            total_price=total_discount,
         )
         for item in cart_items:
             OrderProduct.objects.create(
                 order=order,
-                product=item.product,
+                name=item.product.name,
+                price=item.product.price,
                 quantity=item.quantity
             )
         
@@ -141,7 +155,8 @@ def cart_purchasefunc(request):
             """
         html_message += f"""
         </table>
-        <p><strong>合計金額: {total}円</strong></p>
+        <p><strong>割引金額: {discount}円</strong></p>
+        <p><strong>合計金額: {total_discount}円</strong></p>
         """
         cart.items.all().delete()
         email = request.POST.get('email')
@@ -161,6 +176,9 @@ def cart_purchasefunc(request):
             messages.success(request, "ご購入ありがとうございました")
         else:
             messages.warning(request, "ご購入は完了しましたが、メールの送信に失敗しました。")
+
+        request.session.pop('promo_code', None)
+        request.session.pop('discount', None)
 
         return redirect('listfunc')
     

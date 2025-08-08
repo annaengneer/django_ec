@@ -51,6 +51,13 @@ class Order(models.Model):
     state = models.CharField('state', max_length=30)
     zip = models.CharField('zip', max_length=30)
 
+    promo_code = models.ForeignKey(
+        'PromoCode', on_delete=models.SET_NULL,
+        null=True, blank=True
+    )
+
+    total_price = models.PositiveIntegerField(default=0)
+
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
