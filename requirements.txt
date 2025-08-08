@@ -9,6 +9,7 @@ cloudinary==1.44.1
 cookiecutter==2.6.0
 dj-database-url==3.0.0
 Django==5.2.1
+django-anymail==13.0.1
 django-basicauth==0.5.3
 django-cloudinary-storage==0.3.0
 django-debug-toolbar==5.2.0
