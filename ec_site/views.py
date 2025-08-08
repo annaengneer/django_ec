@@ -33,6 +33,13 @@ def reset_cart(request):
 def add_cartfunc(request,pk):
     product = get_object_or_404(Product, pk=pk)
     cart_id = request.session.get('cart_id')
+
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+        quantity = max(quantity, 1)
+    except (TypeError, ValueError):
+        quantity = 1
+
     if not cart_id:
         cart = Cart.objects.create()
         request.session['cart_id'] = cart.id
@@ -41,8 +48,10 @@ def add_cartfunc(request,pk):
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     
     if not created:
-        cart_item.quantity += 1
-        cart_item.save()
+        cart_item.quantity += quantity
+    else:
+        cart_item.quantity = quantity
+    cart_item.save()
 
     return redirect('view_cartfunc')
 
@@ -76,14 +85,22 @@ def view_cartfunc(request):
 def delete_cartfunc(request, pk):
     cart = get_cart(request)
     try:
+        quantity = int(request.POST.get("quantity", 1))
+        quantity = max(quantity, 1)
+    except (TypeError, ValueError):
+        quantity = 1
+
+    try:
         item = CartItem.objects.get(cart=cart, product__pk=pk)
-        item.quantity -= 1
-        if item.quantity <= 0:
-            item.delete()
-        else:
+        item_remove = int(request.POST.get("quantity", 1))
+        if item.quantity > item_remove:
+            item.quantity -= item_remove
             item.save()
+        else:
+            item.delete()
     except CartItem.DoesNotExist:
         pass
+
     return redirect('view_cartfunc')
 
 @require_POST
