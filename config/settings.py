@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'ec_site',
     'cloudinary',
     'cloudinary_storage',
+    'anymail',
 ]
 
 MIDDLEWARE = [
@@ -176,3 +177,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
 DEFAULT_FROM_EMAIL = f'Dream Company <mailgun@{MAILGUN_DOMAIN}>'
+EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+ANYMAIL = {
+    "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
+    "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN"),
+}
