@@ -64,3 +64,5 @@ class OrderProduct(models.Model):
     price = models.PositiveIntegerField()
     quantity = models.PositiveIntegerField()
     create_at = models.DateTimeField(default=timezone.now)
+
+    dummy = models.BooleanField(default=False)
