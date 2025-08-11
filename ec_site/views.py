@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404,redirect
-from .models import Product, Cart, CartItem,Order,OrderProduct
+from .models import Product, Cart, CartItem,Order,OrderProduct,PromoCode
 from .forms import ProductForm
 from utils.basic_auth import basic_auth_required
 from django.views.decorators.csrf import csrf_exempt
@@ -33,6 +33,13 @@ def reset_cart(request):
 def add_cartfunc(request,pk):
     product = get_object_or_404(Product, pk=pk)
     cart_id = request.session.get('cart_id')
+
+    try:
+        quantity = int(request.POST.get("quantity", 1))
+        quantity = max(quantity, 1)
+    except (TypeError, ValueError):
+        quantity = 1
+
     if not cart_id:
         cart = Cart.objects.create()
         request.session['cart_id'] = cart.id
@@ -41,39 +48,59 @@ def add_cartfunc(request,pk):
     cart_item, created = CartItem.objects.get_or_create(cart=cart, product=product)
     
     if not created:
-        cart_item.quantity += 1
-        cart_item.save()
+        cart_item.quantity += quantity
+    else:
+        cart_item.quantity = quantity
+    cart_item.save()
 
     return redirect('view_cartfunc')
 
 def view_cartfunc(request):
-    cart = get_cart(request)
+    cart_id = request.session.get('cart_id')
+    if not cart_id:
+        messages.info(request, "カートが空です")
+        return render(request, 'product_cart.html')
+    
+    cart = Cart.objects.get(id=cart_id)
     cart_items = cart.items.select_related('product')
 
+    if not cart_items.exists():
+        messages.info(request, "カートが空です")
+        return render(request, 'product_cart.html')
     total = sum(item.product.price * item.quantity for item in cart_items)
-    item_count = sum(item.quantity for item in cart_items)
-    print("DEBUG: item_count =", item_count)
+    discount = request.session.get('discount', 0)
+    total_after_discount = max(total - discount, 0)
 
-    return render(request,'product_cart.html',{
+    context = {
         'cart_items': cart_items,
-        'total': total,
-        'item_count': item_count,
-    })
+        'total': total_after_discount,
+        'discount': discount,
+        'promo_code': request.session.get('promo_code')
+    }
 
+    return render(request,'product_cart.html', context)
 
 
 @require_POST
 def delete_cartfunc(request, pk):
     cart = get_cart(request)
     try:
+        quantity = int(request.POST.get("quantity", 1))
+        quantity = max(quantity, 1)
+    except (TypeError, ValueError):
+        quantity = 1
+
+    try:
         item = CartItem.objects.get(cart=cart, product__pk=pk)
-        item.quantity -= 1
-        if item.quantity <= 0:
-            item.delete()
-        else:
+        item_remove = int(request.POST.get("quantity", 1))
+        if item.quantity > item_remove:
+            item.quantity -= item_remove
             item.save()
+        else:
+            item.delete()
     except CartItem.DoesNotExist:
         pass
+
     return redirect('view_cartfunc')
 
 @require_POST
@@ -90,6 +117,17 @@ def cart_purchasefunc(request):
         cart_items = cart.items.select_related('product')
         total =sum(item.product.price * item.quantity for item in cart_items)
 
+        code = request.session.get('promo_code')
+        discount = request.session.get('discount', 0)
+        promo = None
+
+        if code:
+            try:
+                promo = PromoCode.objects.get(code=code)
+            except PromoCode.DoesNotExist:
+                promo = None
+        total_discount =max( total - discount, 0)
+
         order = Order.objects.create(
             first_name=request.POST.get('first_name', ''),
             last_name=request.POST.get('last_name', ''),
@@ -100,11 +138,14 @@ def cart_purchasefunc(request):
             country=request.POST.get('country', ''),
             state=request.POST.get('state', ''),
             zip=request.POST.get('zip', ''),
+            promo_code=promo,
+            total_price=total_discount,
         )
         for item in cart_items:
             OrderProduct.objects.create(
                 order=order,
-                product=item.product,
+                name=item.product.name,
+                price=item.product.price,
                 quantity=item.quantity
             )
         
@@ -131,7 +172,8 @@ def cart_purchasefunc(request):
             """
         html_message += f"""
         </table>
-        <p><strong>合計金額: {total}円</strong></p>
+        <p><strong>割引金額: {discount}円</strong></p>
+        <p><strong>合計金額: {total_discount}円</strong></p>
         """
         cart.items.all().delete()
         email = request.POST.get('email')
@@ -152,12 +194,38 @@ def cart_purchasefunc(request):
         else:
             messages.warning(request, "ご購入は完了しましたが、メールの送信に失敗しました。")
 
+        request.session.pop('promo_code', None)
+        request.session.pop('discount', None)
+
         return redirect('listfunc')
     
     except Cart.DoesNotExist:
         print("POSTデータ:", request.POST)
         messages.error(request, "カートが見つかりませんでした。")
         return redirect('view_cartfunc')
+    
+def apply_promo_code(request):
+    if request.method == 'POST':
+        code = request.POST.get('promo_code')
+
+        if request.session.get('promo_code') == code:
+            messages.info(request,"すでにプロモーションコード使用済みです")
+            return redirect('view_cartfunc')
+        
+        try:
+            promotion = PromoCode.objects.get(code=code, is_active=True)
+
+            request.session['discount']=promotion.discount_amount
+            request.session['promo_code'] = code
+
+            promotion.is_active = False
+            promotion.save()
+
+            messages.success(request, f"プロモーションコード{code}が適応されました")
+        except PromoCode.DoesNotExist:
+            messages.error(request, "無効なプロモコードです")
+        return redirect('view_cartfunc')
+
 
 def send_email(to_email, subject, message,html_message=None):
         data ={
