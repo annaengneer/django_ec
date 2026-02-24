@@ -1,7 +1,8 @@
 from django.urls import path
 from . import views
-from ec_site import views
+
 urlpatterns = [
+    path('', views.listfunc, name='home'),
     path('product/list', views.listfunc, name='listfunc'),
     path('product/<int:pk>', views.detailfunc, name='detailfunc'),
     path('product/cart/',views.view_cartfunc,name='view_cartfunc'),

@@ -27,9 +27,6 @@ cloudinary.config(
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 BASE_DIR = Path(__file__).resolve().parent.parent
-MEDIR_URL = '/media/'
-MEDIR_ROOT = BASE_DIR / 'media'
-
 env = environ.Env()
 if os.environ.get("DJANGO_DEVELOPMENT") == "True":
     environ.Env.read_env(env_file=str(BASE_DIR) + "/.env")
@@ -41,9 +38,15 @@ if os.environ.get("DJANGO_DEVELOPMENT") == "True":
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env("SECRET_KEY", default = "1%*y(4m-#tdqkcsqj3#6*v$1#283r0ej2ap2*b@19genm72l4j")
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = env.bool('DEBUG', default='False')
-DEBUG = True
-ALLOWED_HOSTS = ['rocky-depths-29723-798aba8c0d31.herokuapp.com','localhost', '127.0.0.1']
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+     # --- old deploy ---
+    'rocky-depths-29723-798aba8c0d31.herokuapp.com',
+    # --- production (Render) ---
+     '.onrender.com',
+]
 
 
 # Application definition
@@ -63,6 +66,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,9 +95,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES_URL = os.environ.get('DATABASE_URL')
 
@@ -128,7 +129,6 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
     
 
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -147,7 +147,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
 
@@ -159,9 +158,6 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
@@ -169,10 +165,10 @@ STATICFILES_DIRS = [
 ]
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
