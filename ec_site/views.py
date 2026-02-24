@@ -8,9 +8,9 @@ from .forms import ProductForm
 from utils.cart import get_cart
 from django.contrib import messages
 from django.conf import settings
-import requests
+from django.core.mail import send_mail
 from django.http import HttpResponse
-
+import requests
 
 
 def listfunc(request):
@@ -178,21 +178,22 @@ def cart_purchasefunc(request):
         cart.items.all().delete()
         email = request.POST.get('email')
         if not email:
-            messages.error(request,"メールアドレスが入力されていません")
+            messages.error(request, "メールアドレスが入力されていません")
             return redirect('view_cartfunc')
-        response = send_email(
+
+        success = send_email(
             to_email=email,
             subject='ご注文ありがとうございました',
             message='以下に購入明細添付しています。',
             html_message=html_message
         )
-        print(f"送信先メールアドレス: {email}")
-        print(f"Mailgun response: {response.status_code},{response.text}")
         
-        if response.status_code == 200:
+        if success:
             messages.success(request, "ご購入ありがとうございました")
         else:
             messages.warning(request, "ご購入は完了しましたが、メールの送信に失敗しました。")
+        
+
 
         request.session.pop('promo_code', None)
         request.session.pop('discount', None)
@@ -226,23 +227,42 @@ def apply_promo_code(request):
             messages.error(request, "無効なプロモコードです")
         return redirect('view_cartfunc')
 
+def send_email(to_email, subject, message, html_message=None):
 
-def send_email(to_email, subject, message,html_message=None):
-        data ={
+    if getattr(settings, "USE_MAILGUN", False):
+        # --- Mailgun API ---
+        data = {
             "from": settings.DEFAULT_FROM_EMAIL,
             "to": [to_email],
             "subject": subject,
             "text": message,
         }
+
         if html_message:
-            data["html"]= html_message
+            data["html"] = html_message
 
         response = requests.post(
             f'https://api.mailgun.net/v3/{settings.MAILGUN_DOMAIN}/messages',
             auth=('api', settings.MAILGUN_API_KEY),
             data=data
         )
-        return response
+        return response.status_code == 200
+
+    else:
+        # --- Django backend (console etc) ---
+        try:
+            send_mail(
+                subject=subject,
+                message=message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[to_email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            return True
+        except Exception as e:
+            print("メール送信エラー:", e)
+            return False
 
 
 @basic_auth_required
@@ -300,8 +320,8 @@ def manage_order_list(request):
 
 def manage_order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
-    items =order.card_set.select_related('product').all()
-    total =sum(item.product.price * item.quantity for item in items)
+    items = order.orderproduct_set.all()
+    total = sum(item.price * item.quantity for item in items)
     return render(request,'order_detail.html', {
         'order': order,
         'items': items,

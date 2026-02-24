@@ -172,9 +172,17 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MAILGUN_API_KEY = os.getenv('MAILGUN_API_KEY')
 MAILGUN_DOMAIN = os.getenv('MAILGUN_DOMAIN')
-DEFAULT_FROM_EMAIL = f'Dream Company <mailgun@{MAILGUN_DOMAIN}>'
-EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
-ANYMAIL = {
-    "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
-    "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN"),
-}
+DEFAULT_FROM_EMAIL = "no-reply@example.com"
+
+# --- Mail settings ---
+
+USE_MAILGUN = os.environ.get("USE_MAILGUN", "False") == "True"
+
+if USE_MAILGUN:
+    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
+    ANYMAIL = {
+        "MAILGUN_API_KEY": os.environ.get("MAILGUN_API_KEY"),
+        "MAILGUN_SENDER_DOMAIN": os.environ.get("MAILGUN_DOMAIN"),
+    }
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
