@@ -291,17 +291,16 @@ def manage_edit(request,pk):
         form = ProductForm(instance=products)
     return render(request, 'manage_edit.html', {'form': form, 'product': products})
 
-def manage_delete(request,pk):
+def manage_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
 
     if request.method == 'POST':
-        form = ProductForm(request.POST, request.FILES, instance=product)
-        if form.is_valid():
-            form.save()
-            return redirect('manage_products')
-    else:
-        form = ProductForm(instance=product)
-    return render(request, 'manage_edit.html', {'form': form})
+        product.delete()
+        return redirect('manage_products')
+
+    return render(request, 'manage_delete_confirm.html', {
+        'product': product
+    })
     
 def upload_product(request):
     if request.method == 'POST':
