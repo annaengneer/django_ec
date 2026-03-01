@@ -1,23 +1,60 @@
-# 環境構築
+# ECサイト（Django）
+
+Djangoを用いてECサイトを開発しました。
+ユーザーによる商品購入機能に加え、管理者が商品・注文を管理できる管理画面を実装しています。
+
+URL：https://django-ec-site-hsxj.onrender.com/
 
 
-## .envを作成し、以下を記載
+## 📌 概要
 
-SECRET_KEYは自身で生成する
+本アプリは、ECサイトに必要な基本機能を一通り実装したWebアプリケーションです。
 
-[【Django】settings.pyのSECRET_KEYを再発行(リジェネレート)する](https://noauto-nolife.com/post/django-secret-key-regenerate/)
+ユーザー側では商品閲覧・カート追加・購入処理を行うことができ、
+管理者側では商品管理・注文管理を行える構成としています。
 
-```.env
-DATABASE_URL="postgres://postgres:postgres@db:5432/django_develop"
-SECRET_KEY=<自身で生成したものを使う>
-```
+実務を意識し、「利用者」と「管理者」の責務を分離した設計を行いました。
 
-## dockerを立ち上げる
 
-```
-docker-compose up
-```
+## 🧑‍💻 使用技術
 
-ブラウザで[localhost:3000/hello](http://localhost:3000/hello)にアクセスし、以下の画面が表示されたら、構築完了。
-![セットアップ完了後の画面](./static/setup_completed.png)
+- Python
+- Django
+- HTML / CSS / Bootstrap
+- SQLite（または PostgreSQL）
+- Git / GitHub
+- Render（デプロイ）
 
+
+
+## 👤 ユーザー機能
+
+- ユーザー登録 / ログイン機能
+- 商品一覧表示
+- 商品詳細ページ
+- カート機能
+- 商品購入処理
+- 注文履歴確認
+
+
+## 🛒 EC機能
+
+- 商品情報表示
+- 在庫管理
+- 購入数量指定
+- 合計金額自動計算
+
+
+## ⚙️ 管理者（Admin）機能
+
+DjangoのAdmin機能をカスタマイズし、
+管理者がサイト運営を行えるようにしました。
+
+### 管理画面で可能な操作
+
+- 商品の追加 / 編集 / 削除
+- 在庫管理
+- 注文情報管理
+
+
+管理画面URL：https://django-ec-site-hsxj.onrender.com/manage/products
